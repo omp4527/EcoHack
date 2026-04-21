@@ -1,0 +1,3 @@
+"""
+CarbonSnap – utils package init
+"""

@@ -1,0 +1,3 @@
+"""
+CarbonSnap – pages package init
+"""
