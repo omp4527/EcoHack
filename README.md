@@ -129,4 +129,4 @@ kaleido>=0.2.1
 
 ---
 
-*Built with ❤️ for EcoHack 2025 | MIT-ALANDI*
+*Built with ❤️ for EcoHack 2026*
