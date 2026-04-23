@@ -32,7 +32,7 @@ def render_sidebar() -> dict:
     flight_domestic= st.sidebar.number_input("Flight (km)", 0.0, 5000.0, 0.0, 50.0)
 
     st.sidebar.markdown("### Energy (today's usage)")
-    electricity   = st.sidebar.number_input("Electricity (kWh)", 0.0, 50.0, 4.0, 0.5)
+    electricity   = st.sidebar.number_input("Electricity (kWh)", 0.0, 50.0, 0.0, 0.5)
     lpg           = st.sidebar.number_input("LPG (kg)",          0.0, 10.0, 0.0, 0.1)
     natural_gas   = st.sidebar.number_input("Natural Gas (m³)",  0.0, 20.0, 0.0, 0.5)
 
@@ -41,19 +41,19 @@ def render_sidebar() -> dict:
         beef    = st.number_input("Beef (kg)",    0.0, 2.0, 0.0, 0.05,  key="f_beef")
         lamb    = st.number_input("Lamb (kg)",    0.0, 2.0, 0.0, 0.05,  key="f_lamb")
         pork    = st.number_input("Pork (kg)",    0.0, 2.0, 0.0, 0.05,  key="f_pork")
-        chicken = st.number_input("Chicken (kg)", 0.0, 2.0, 0.05, 0.05, key="f_chk")
+        chicken = st.number_input("Chicken (kg)", 0.0, 2.0, 0.0, 0.05, key="f_chk")
         fish    = st.number_input("Fish (kg)",    0.0, 2.0, 0.0, 0.05,  key="f_fish")
     with st.sidebar.expander("Dairy, Grains & Veg", expanded=False):
-        eggs       = st.number_input("Eggs (kg)",       0.0, 1.0, 0.05, 0.05, key="f_eggs")
-        dairy      = st.number_input("Dairy (kg)",      0.0, 2.0, 0.2,  0.05, key="f_dairy")
-        rice       = st.number_input("Rice (kg)",       0.0, 1.0, 0.2,  0.05, key="f_rice")
-        vegetables = st.number_input("Vegetables (kg)", 0.0, 2.0, 0.3,  0.05, key="f_veg")
-        fruits     = st.number_input("Fruits (kg)",     0.0, 2.0, 0.1,  0.05, key="f_fruit")
-        pulses     = st.number_input("Pulses (kg)",     0.0, 1.0, 0.1,  0.05, key="f_pulse")
+        eggs       = st.number_input("Eggs (kg)",       0.0, 1.0, 0.0, 0.05, key="f_eggs")
+        dairy      = st.number_input("Dairy (kg)",      0.0, 2.0, 0.0,  0.05, key="f_dairy")
+        rice       = st.number_input("Rice (kg)",       0.0, 1.0, 0.0,  0.05, key="f_rice")
+        vegetables = st.number_input("Vegetables (kg)", 0.0, 2.0, 0.0,  0.05, key="f_veg")
+        fruits     = st.number_input("Fruits (kg)",     0.0, 2.0, 0.0,  0.05, key="f_fruit")
+        pulses     = st.number_input("Pulses (kg)",     0.0, 1.0, 0.0,  0.05, key="f_pulse")
 
     st.sidebar.markdown("### Waste (kg today)")
-    mixed_waste = st.sidebar.number_input("Mixed Waste (kg)", 0.0, 10.0, 0.5, 0.1)
-    recycled    = st.sidebar.number_input("Recycled (kg)",    0.0, 10.0, 0.1, 0.1)
+    mixed_waste = st.sidebar.number_input("Mixed Waste (kg)", 0.0, 10.0, 0.0, 0.1)
+    recycled    = st.sidebar.number_input("Recycled (kg)",    0.0, 10.0, 0.0, 0.1)
     composted   = st.sidebar.number_input("Composted (kg)",   0.0, 5.0,  0.0, 0.1)
 
     # Demo mode

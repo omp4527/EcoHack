@@ -81,11 +81,14 @@ def init_db():
         conn.execute(CREATE_BADGES_TABLE)
         conn.execute(CREATE_XP_TABLE)
         
-        # Migration: Add mobile column if not exists
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN mobile TEXT")
-        except sqlite3.OperationalError:
-            pass # Column already exists
+        # Migration: Add mobile column only if missing
+        cursor = conn.execute("PRAGMA table_info(users)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if "mobile" not in columns:
+            try:
+                conn.execute("ALTER TABLE users ADD COLUMN mobile TEXT")
+            except sqlite3.OperationalError:
+                pass
             
         conn.commit()
 

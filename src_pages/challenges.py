@@ -136,6 +136,7 @@ def _get_challenge_state(challenge_id: str) -> dict:
         st.session_state[key] = {
             "status": "not_started",  # not_started, active, completed
             "start_date": None,
+            "last_logged_date": None,
             "days_done": 0,
         }
     return st.session_state[key]
@@ -230,11 +231,17 @@ def render_challenges():
 
                 elif status == "active":
                     btn_col1, btn_col2 = st.columns(2)
+                    last_date = state.get("last_logged_date")
+                    can_log = last_date != date.today().isoformat()
+                    
                     with btn_col1:
-                        if st.button(f"Log Day {days_done+1}", key=f"log_{cid}", use_container_width=True):
+                        if st.button(f"Log Day {days_done+1}", key=f"log_{cid}", 
+                                     use_container_width=True, disabled=not can_log,
+                                     help="You can only log one day per calendar day" if not can_log else ""):
                             new_days = days_done + 1
+                            today_str = date.today().isoformat()
                             if new_days >= duration:
-                                _update_challenge(cid, {"status": "completed", "days_done": new_days})
+                                _update_challenge(cid, {"status": "completed", "days_done": new_days, "last_logged_date": today_str})
                                 xp_gain = int(challenge["reward"].split("+")[-1].replace("XP","").strip())
                                 if "xp" not in st.session_state:
                                     st.session_state.xp = 0
@@ -255,9 +262,12 @@ def render_challenges():
                                 st.balloons()
                                 st.success(f"🏆 Challenge COMPLETED! +{xp_gain} XP earned!")
                             else:
-                                _update_challenge(cid, {"days_done": new_days})
-                                st.success(f"Day {new_days}/{duration} done! Keep going!")
+                                _update_challenge(cid, {"days_done": new_days, "last_logged_date": today_str})
+                                st.success(f"Day {new_days}/{duration} done! See you tomorrow!")
                             st.rerun()
+                        
+                        if not can_log:
+                            st.info("Next day available tomorrow!")
                     with btn_col2:
                         if st.button("Abandon", key=f"abandon_{cid}", use_container_width=True):
                             _update_challenge(cid, {"status": "not_started", "days_done": 0})

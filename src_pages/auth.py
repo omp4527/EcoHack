@@ -37,7 +37,7 @@ def render_auth_page(dark: bool = True):
     Render the login/signup page.
     Sets st.session_state['logged_in'] = True on success.
     """
-    init_db()
+    # init_db is handled in app.py
 
     # ── Hero Banner ───────────────────────────────────────────────────────────
     bg   = "#0f172a" if dark else "#f0fdf4"
@@ -172,20 +172,29 @@ def _seed_demo_db(user_id: int):
 
     today = date.today()
     base  = 4.5
-    for i in range(14):
-        d = today - timedelta(days=13 - i)
-        total     = max(0.5, base - i * 0.08 + random.uniform(-0.5, 0.5))
-        transport = max(0, total * 0.40 + random.uniform(-0.2, 0.2))
-        energy    = max(0, total * 0.25 + random.uniform(-0.1, 0.1))
-        food      = max(0, total * 0.28 + random.uniform(-0.15, 0.15))
-        waste     = max(0, total - transport - energy - food)
-        save_history_db(user_id, {
-            "date":         d.isoformat(),
-            "total_kg":     round(total, 3),
-            "transport_kg": round(transport, 3),
-            "energy_kg":    round(energy, 3),
-            "food_kg":      round(food, 3),
-            "waste_kg":     round(waste, 3),
-            "electricity":  round(random.uniform(2, 8), 2),
-            "car_petrol":   round(random.uniform(5, 20), 1),
-        })
+    with get_connection() as conn:
+        for i in range(14):
+            d = today - timedelta(days=13 - i)
+            total     = max(0.5, base - i * 0.08 + random.uniform(-0.5, 0.5))
+            transport = max(0, total * 0.40 + random.uniform(-0.2, 0.2))
+            energy    = max(0, total * 0.25 + random.uniform(-0.1, 0.1))
+            food      = max(0, total * 0.28 + random.uniform(-0.15, 0.15))
+            waste     = max(0, total - transport - energy - food)
+            
+            conn.execute("""
+                INSERT INTO carbon_history
+                    (user_id, date, total_kg, transport_kg, energy_kg, food_kg, waste_kg, electricity, car_petrol)
+                VALUES (?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(user_id, date) DO NOTHING
+            """, (
+                user_id,
+                d.isoformat(),
+                round(total, 3),
+                round(transport, 3),
+                round(energy, 3),
+                round(food, 3),
+                round(waste, 3),
+                round(random.uniform(2, 8), 2),
+                round(random.uniform(5, 20), 1),
+            ))
+        conn.commit()

@@ -10,6 +10,9 @@ import sys, os
 # ── Path fix ─────────────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.dirname(__file__))
 
+# Defer heavy imports
+import time
+
 # ── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="CarbonSnap – Personal Carbon Tracker",
@@ -53,17 +56,18 @@ if not st.session_state["logged_in"] and "login_token" in st.query_params:
     except Exception:
         pass
 
-# ── DB Init + Demo account ────────────────────────────────────────────────────
-from utils.auth_db import init_db
-init_db()
-# Silently ensure a demo account exists (first run only)
-try:
-    from src_pages.auth import create_demo_account
-    if not st.session_state.get("_demo_seeded"):
+# ── DB Init (Deferred to first run) ───────────────────────────────────────────
+if "db_initialized" not in st.session_state:
+    from utils.auth_db import init_db
+    init_db()
+    st.session_state["db_initialized"] = True
+    
+    # Silently ensure a demo account exists
+    try:
+        from src_pages.auth import create_demo_account
         create_demo_account()
-        st.session_state["_demo_seeded"] = True
-except Exception:
-    pass
+    except Exception:
+        pass
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
 from utils.styles import inject_css
@@ -94,8 +98,11 @@ with st.sidebar:
 
 
 # ── Sidebar Inputs (Dashboard) ────────────────────────────────────────────────
-from src_pages.dashboard import render_sidebar
-inputs = render_sidebar()
+if st.session_state["active_page"] == "Dashboard":
+    from src_pages.dashboard import render_sidebar
+    inputs = render_sidebar()
+else:
+    inputs = {}
 
 # ── Custom Top Nav Bar (styled buttons) ───────────────────────────────────────
 active_page = st.session_state.get("active_page", "Dashboard")
@@ -133,14 +140,7 @@ with cols[-1]:
 st.markdown("<hr style='border:none;border-top:1px solid rgba(34,197,94,0.12);margin:8px 0 20px'>",
             unsafe_allow_html=True)
 
-# ── Sync DB history to session state on first load per session ────────────────
-user_id = st.session_state.get("user_id")
-if user_id and not st.session_state.get("_history_synced"):
-    from utils.auth_db import load_history_db, load_badges_db, load_xp_db
-    st.session_state["carbonsnap_history"] = load_history_db(user_id)
-    st.session_state["badges"]             = load_badges_db(user_id)
-    st.session_state["xp"]                 = load_xp_db(user_id)
-    st.session_state["_history_synced"]    = True
+# Redundant sync removed - handled in auth.py during login
 
 # ── Page Routing ──────────────────────────────────────────────────────────────
 page = st.session_state.get("active_page", "Dashboard")

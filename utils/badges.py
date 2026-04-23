@@ -10,15 +10,15 @@ BADGE_CATALOGUE = {
     "streak_30":   {"emoji": "🏆", "title": "Eco Hero",            "desc": "30 days streak!",               "xp": 300},
 
     # Emission level badges
-    "below_avg":   {"emoji": "🌱", "title": "Below Average",       "desc": "Footprint < India avg (4kg)",   "xp": 20},
-    "eco_champ":   {"emoji": "🥇", "title": "Eco Champion",        "desc": "Daily footprint ≤ 2 kg",        "xp": 50},
+    "below_avg":   {"emoji": "🌱", "title": "Below Average",       "desc": "Footprint < 4kg for 30 days",   "xp": 150},
+    "eco_champ":   {"emoji": "🥇", "title": "Eco Champion",        "desc": "Daily footprint ≤ 2kg for 15 days", "xp": 200},
     "net_zero_day":{"emoji": "⚡", "title": "Net Zero Day",        "desc": "Achieved 0 extra emissions",    "xp": 100},
 
     # Challenge badges
-    "no_car_day":  {"emoji": "🚗", "title": "No-Car Day",          "desc": "Zero transport emissions",      "xp": 40},
-    "vegan_day":   {"emoji": "🥗", "title": "Plant Power",         "desc": "Zero animal product emissions", "xp": 40},
-    "zero_waste":  {"emoji": "♻️", "title": "Zero Waster",        "desc": "Zero landfill waste today",     "xp": 40},
-    "solar_day":   {"emoji": "☀️", "title": "Sun Powered",         "desc": "Electricity < 0.5 kWh",         "xp": 40},
+    "no_car_day":  {"emoji": "🚗", "title": "Public Pro",          "desc": "Zero transport for 7 days",     "xp": 100},
+    "vegan_day":   {"emoji": "🥗", "title": "Plant Power",         "desc": "Zero animal product for 7 days", "xp": 100},
+    "zero_waste":  {"emoji": "♻️", "title": "Zero Waster",        "desc": "Zero landfill waste for 7 days", "xp": 100},
+    "solar_day":   {"emoji": "☀️", "title": "Sun Powered",         "desc": "Electricity < 0.5 kWh for 7 days", "xp": 100},
 
     # Reduction badges
     "reduced_10":  {"emoji": "📉", "title": "10% Reducer",         "desc": "Cut weekly avg by 10%",         "xp": 60},
@@ -57,30 +57,33 @@ def award_badges(history: list, session_state) -> list[str]:
         if streak >= 30 and "streak_30" not in already:
             newly_awarded.append("streak_30")
 
-    # Emission-based
+    # Helper for multi-day conditions
+    def check_last_n(n, condition_fn):
+        if len(history) < n: return False
+        return all(condition_fn(h) for h in history[-n:])
+
+    # Multi-day achievements
     if history:
-        last = history[-1]
-        total = last.get("total_kg", 99)
-        if total <= 4.0 and "below_avg" not in already:
+        # Below average for 30 days
+        if check_last_n(30, lambda x: x.get("total_kg", 99) < 4.0) and "below_avg" not in already:
             newly_awarded.append("below_avg")
-        if total <= 2.0 and "eco_champ" not in already:
+        
+        # Eco champ for 15 days
+        if check_last_n(15, lambda x: x.get("total_kg", 99) <= 2.0) and "eco_champ" not in already:
             newly_awarded.append("eco_champ")
-        if total == 0.0 and "net_zero_day" not in already:
+        
+        # Net zero day (keep as 1 day achievement)
+        if history[-1].get("total_kg", 99) == 0.0 and "net_zero_day" not in already:
             newly_awarded.append("net_zero_day")
 
-        # Category-specific
-        transport_kg = last.get("transport_kg", 99)
-        food_kg = last.get("food_kg", 99)
-        waste_kg = last.get("waste_kg", 99)
-        energy_kwh = last.get("electricity", 99)
-
-        if transport_kg == 0 and "no_car_day" not in already:
+        # Category-specific (all for 7 days now)
+        if check_last_n(7, lambda x: x.get("transport_kg", 99) == 0) and "no_car_day" not in already:
             newly_awarded.append("no_car_day")
-        if food_kg == 0.0 and "vegan_day" not in already:
+        if check_last_n(7, lambda x: x.get("food_kg", 99) == 0.0) and "vegan_day" not in already:
             newly_awarded.append("vegan_day")
-        if waste_kg == 0 and "zero_waste" not in already:
+        if check_last_n(7, lambda x: x.get("waste_kg", 99) == 0) and "zero_waste" not in already:
             newly_awarded.append("zero_waste")
-        if energy_kwh <= 0.5 and "solar_day" not in already:
+        if check_last_n(7, lambda x: x.get("electricity", 99) <= 0.5) and "solar_day" not in already:
             newly_awarded.append("solar_day")
 
     # Reduction badges (compare weekly averages)
