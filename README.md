@@ -12,7 +12,6 @@
 
 ```bash
 # 1. Clone / navigate to project
-cd d:\MIT-ALANDI\Hackathon\EcoHack
 
 # 2. Install dependencies
 pip install -r requirements.txt
